@@ -10,7 +10,8 @@ Updated: 2026-10-04
 - Reworked Content Studio around an active identity panel, image-generation request status, camera/lighting settings, output preview and save-image action.
 - Only Create Image is connected in the backend; other media modes are visibly marked provider-pending.
 - JavaScript syntax was checked with V8 `new Function(...)` after correcting a syntax error; parse check passed.
-- Latest UI commits: `1fb7385e0310968366bea787dca8da186e2cd8ea`, `ce7d7742b2891ec8077326011ac97eb5fa988ea6`, `6683a3e2f35a654ea1657d2bc3aa252072c8fd68`, `3c42f41f1ed1e0fe0ab78e861dea22a29b609a2d`.
+- Latest UI commits: `1fb7385e0310968366bea787dca8da186e2cd8ea`, `ce7d7742b2891ec8077326011ac97eb5fa988ea6`, `6683a3e2f35a654ea1657d2bc3aa252072c8fd68`, `3c42f41f1ed1e0fe0ab78e861dea22a29b609a2d`, `28b7628513b50330cb48cc3b1d23db1f984c36aa`.
+- Image Studio now opens with a starter fictional-adult portrait prompt, so a user can generate a first portrait without composing a prompt from scratch; the prompt remains editable.
 
 ## Latest issue / fix
 - User reported a blank white page in the browser.
@@ -41,7 +42,7 @@ Updated: 2026-10-04
 - Persistent storage, authentication, billing, social publishing and identity persistence remain pending.
 
 ## Current truth
-The redesigned frontend is committed and passes a JavaScript syntax parse check. Render deployment and public-page rendering are not yet verified. It is not a finished live-model product: the 50 photorealistic portraits, reference-photo conditioning, persistent identity lock, cloud asset storage, and non-image media providers remain outstanding. Real image output must be confirmed by an actual public request.
+The redesigned frontend is committed and passes a JavaScript syntax parse check. Render deployment and public-page rendering are not yet verified. The web preview tool could not access the public URL during this check. It is not a finished live-model product: the 50 photorealistic portraits, reference-photo conditioning, persistent identity lock, cloud asset storage, and non-image media providers remain outstanding. Real image output must be confirmed by an actual public request.
 
 ## Exact next steps
 1. Verify Render deploys the redesigned frontend commit and open the public website to confirm it renders.
