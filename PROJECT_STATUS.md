@@ -2,6 +2,15 @@
 
 Updated: 2026-10-04
 
+## Latest backend work
+- Corrected Gemini 3.1 Flash Image response extraction to read image content from the documented `interaction.steps` model-output blocks, with a compatibility fallback for `output_image`.
+- Added an Instagram Business Login integration layer using the current Instagram OAuth endpoints and professional-account scopes: connect, callback, token refresh, profile/follower sync, media listing, comments listing, comment replies and image publishing endpoints.
+- Added Instagram webhook verification/receiver endpoints.
+- Added frontend Connect Instagram and Sync live insights actions and OAuth callback routing back to the selected model profile.
+- Instagram connection state is currently held in server memory; persistent multi-account storage and background automation still require a durable datastore and secure token storage.
+- Official Google documentation confirms Gemini 3.1 Flash Image accepts image + text input and returns generated images through interaction model-output steps. citeturn0search0turn0search1
+- Current Meta documentation sources confirm Instagram Business Login supports professional Business/Creator accounts, content publishing, comment management, messaging and related permissions; exact availability depends on the account/app permissions and review state. citeturn2search0turn2search2
+
 ## Model business workflow — latest changes
 - New identities now receive sequential model IDs after the 50 seeded identity templates (for example model-51, model-52), and remain in the Discover/My Models lists after browser-local save.
 - Each identity profile now has its own Instagram username/profile URL fields and audience log fields for followers, likes, comments and reach. These figures are explicitly manual entries saved to this browser; they are NOT live Instagram analytics.
@@ -23,7 +32,7 @@ Updated: 2026-10-04
 - This is a face-first AI Model & Fan Studio, not a generic prompt-only image generator.
 - Main flow: select/create fictional adult identity → configure Visual DNA and face reference → generate content with the same identity reference → review/save assets → later approve/schedule/publish to connected social channels.
 - Each model is intended to have its own identity workspace, content history and social publishing configuration.
-- Social connections, publishing approvals/scheduling, fan memberships/subscriptions and live social analytics are product requirements, not yet verified features.
+- Instagram OAuth/connect, profile sync and publish/comment endpoints are coded but not end-to-end verified; durable token storage, multi-account persistence and automated scheduling remain outstanding.
 
 ## Latest implementation changes
 - Added consent-gated reference-image payload handling to `/api/generate`; accepts PNG/JPEG/WebP data URLs under the configured size limit and passes image + prompt to Gemini Interactions.
@@ -38,7 +47,7 @@ Updated: 2026-10-04
 - Added Visual DNA fields for adult age, gender presentation, height, chest/bust, waist, hips, body build, skin tone, face shape, eye colour and hair.
 - Added live profile summary and browser-local saving for custom models/edited DNA; this is not cloud persistence.
 - Reworked Content Studio around an active identity panel, image-generation request status, camera/lighting settings, reference preview, consent, output preview and save-image action.
-- Only Create Image is connected in the backend; other media modes are visibly marked provider-pending.
+- Create Image is connected to Gemini; the backend now correctly extracts generated image blocks from Gemini interactions. Video and other media modes remain provider-pending.
 - JavaScript syntax was checked with V8 `new Function(...)` after correcting a syntax error; parse check passed.
 - Latest UI commits: `1fb7385e0310968366bea787dca8da186e2cd8ea`, `ce7d7742b2891ec8077326011ac97eb5fa988ea6`, `6683a3e2f35a654ea1657d2bc3aa252072c8fd68`, `3c42f41f1ed1e0fe0ab78e861dea22a29b609a2d`, `28b7628513b50330cb48cc3b1d23db1f984c36aa`, `cbb91131f1ef27e3ceba0120d8d8bc4d85757b2d`, `32a2b17599069d18f0bb38c8afa1e55387034a22`, `867762c6a9d9d4025362b07787c1cf8a8a78642f`, `ae55d7ccec019412623cdd71c7dd0fead47faf22`.
 - Image Studio now opens with a starter fictional-adult portrait prompt, so a user can generate a first portrait without composing a prompt from scratch; the prompt remains editable.
@@ -67,7 +76,7 @@ Updated: 2026-10-04
 
 ## Not yet verified / blocked
 - Public HTTP endpoint could not be independently called from this tool environment.
-- A real end-to-end Gemini image generation request has NOT been independently verified from this environment.
+- A real end-to-end Gemini image generation request has NOT been independently verified from this environment because the public Render endpoint is inaccessible to the available web preview tool.
 - Google currently lists Gemini 3.1 Flash Image with no Free Tier; production API image generation may require paid billing. Gemini 2.5 Flash Image is no longer the current choice and Google lists it as shut down/deprecated.
 - Reference-photo conditioning code is committed but a real reference-to-image end-to-end request has not yet been verified.
 - 50 final photorealistic portrait assets are NOT yet generated; current cards use UI placeholders.
@@ -84,4 +93,4 @@ The redesigned frontend, consent-gated reference conditioning, per-model social/
 5. Implement persistent Visual DNA/identity-lock assets and cloud-backed My Models/Asset Library.
 6. Connect and test video, image-to-video, edit, upscale, trend/motion and frame-to-frame providers.
 7. Add authentication, billing and social publishing.
-8. Run end-to-end regression tests and update this file with verified results.
+8. Run end-to-end regression tests, including real Gemini generation and Meta test-account publishing/comment flows, and update this file with verified results.
