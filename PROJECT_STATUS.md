@@ -2,6 +2,14 @@
 
 Updated: 2026-10-04
 
+## Model business workflow — latest changes
+- New identities now receive sequential model IDs after the 50 seeded identity templates (for example model-51, model-52), and remain in the Discover/My Models lists after browser-local save.
+- Each identity profile now has its own Instagram username/profile URL fields and audience log fields for followers, likes, comments and reach. These figures are explicitly manual entries saved to this browser; they are NOT live Instagram analytics.
+- Added a comment reply drafting helper with tone/language options and copy action. It creates local canned drafts only; it does NOT read Instagram comments, call an AI reply service, or publish replies.
+- Added model profile JSON export.
+- Instagram OAuth connection, automatic daily publishing, live insights, comment/DM ingestion, AI-generated replies, subscription checkout and premium content delivery remain unimplemented and require official provider credentials, backend integration, secure persistent storage and compliance review.
+- Current web app remains a Render-hosted website; no Cloudflare deployment or Cloudflare integration has been provisioned. Moving this app to Cloudflare would be a separate hosting migration, not an automatic Gemini fallback.
+
 ## Additional face-first implementation
 - The reference photo is previewed before generation, requires a permission/consent checkbox, and is included in the Gemini request as an image input.
 - When a model receives a successful generation, that generated image is reused as its next image request reference during the current browser session only.
@@ -39,6 +47,8 @@ Updated: 2026-10-04
 - Root cause found in `public/app.js`: 13 literal `\\n` sequences were present between JavaScript statements, causing a script parse error and preventing the app from rendering.
 - Replaced those sequences with real line breaks in commit `bca0bcaf203f81e0f2e018c10ce31fe25084fb10`; later redesign rewrote the frontend.
 - The frontend has also had a separate generation-workspace syntax error corrected in commit `3c42f41f1ed1e0fe0ab78e861dea22a29b609a2d` and passed a JavaScript parse check.
+- Latest social panel frontend syntax check passed after correcting template interpolation in commit `c5cbe0a99dd3c0b153c9aa35c1dd9af9424154a8`.
+- Sequential model numbering added in commit `0693a59dc0b328fc94ecf01660d30771c36f9353`.
 - Render deployment and public-browser verification of the redesign are pending.
 
 ## Verified completed
@@ -63,10 +73,10 @@ Updated: 2026-10-04
 - Persistent storage, authentication, billing, social publishing and identity persistence remain pending.
 
 ## Current truth
-The redesigned frontend and consent-gated reference-image conditioning are committed; JavaScript syntax parsing passed after the frontend changes. Render has deployed some intermediate updates, while the newest shoot-control commit is awaiting live verification. The web preview tool could not access the public URL during this check. It is not a finished live-model product: the 50 photorealistic portraits, reference-photo conditioning, persistent identity lock, cloud asset storage, and non-image media providers remain outstanding. Real image output must be confirmed by an actual public request.
+The redesigned frontend, consent-gated reference conditioning, per-model social/audience log UI, reply-draft helper, JSON export and sequential model numbering are committed; the current app.js passes a JavaScript syntax parse check. Render deployment of the latest commits and public-browser rendering remain to be verified. Social integrations and real image output have not passed end-to-end tests. The web preview tool could not access the public URL during this check. It is not a finished live-model product: the 50 photorealistic portraits, reference-photo conditioning, persistent identity lock, cloud asset storage, and non-image media providers remain outstanding. Real image output must be confirmed by an actual public request.
 
 ## Exact next steps
-1. Verify Render deploys the newest shoot-control commit and open the public website to confirm it renders.
+1. Verify Render deploys the latest social-panel and model-numbering commits and open the public website to confirm it renders.
 2. Test the Create Image endpoint end-to-end and record any exact Gemini error.
 3. Verify the newly committed reference-photo conditioning through an actual public request, including consent and image type/size rejection.
 4. Generate and store actual fictional adult portraits for the 50 templates; remove any template from 'ready' status until its portrait exists.
