@@ -22,28 +22,36 @@ function imageFormat(aspectRatio){
 }
 
 app.post("/api/generate",async(req,res)=>{
-  const {mode="free",modelId=null,prompt="",settings={}}=req.body||{};
+  const {mode="free",modelId=null,prompt="",settings={},referenceImage=null,referenceConsent=false}=req.body||{};
   if(typeof prompt!=="string"||!prompt.trim())return res.status(400).json({ok:false,error:"Prompt is required"});
   const mediaMode=settings.mediaMode||"Create Image";
   if(mediaMode!=="Create Image")return res.status(501).json({
     ok:false,status:"provider_pending",
     message:"This mode is not connected yet. Real Gemini image generation is enabled for Create Image."
   });
+  if(referenceImage && referenceConsent!==true)return res.status(400).json({ok:false,error:"Confirm you have permission and consent to use this reference image."});
+  let referencePart=null;
+  if(referenceImage){
+    if(typeof referenceImage!=="string"||referenceImage.length>10*1024*1024)return res.status(413).json({ok:false,error:"Reference image is too large. Use an image under 7 MB."});
+    const match=referenceImage.match(/^data:(image\/(?:png|jpeg|webp));base64,([A-Za-z0-9+/=]+)$/);
+    if(!match)return res.status(400).json({ok:false,error:"Use a PNG, JPEG or WebP reference image."});
+    referencePart={type:"image",mime_type:match[1],data:match[2]};
+  }
   if(!process.env.GEMINI_API_KEY)return res.status(503).json({
     ok:false,status:"provider_not_configured",
     message:"Gemini image provider is not configured. Add GEMINI_API_KEY in Render Environment."
   });
 
   const identity=modelId
-    ? "Create an original fictional adult AI model identity named "+String(modelId)+". Keep the person's appearance coherent within this generated image. "
+    ? "Create an original fictional adult AI model identity named "+String(modelId)+". Keep the person's facial identity, age presentation, skin tone, eye colour, hair and proportions consistent with the supplied reference image when present. "
     : "Create an original fictional adult AI model. ";
-  const fullPrompt=identity+prompt.trim()+" Style: "+String(settings.style||"Photorealistic")+". Do not depict a real public figure or impersonate a real person.";
+  const fullPrompt=identity+prompt.trim()+" Style: "+String(settings.style||"Photorealistic")+". Do not depict a real public figure or impersonate a real person. If a reference image is provided, use it only as an authorized appearance reference and preserve the same adult person's recognizable facial identity; change only the requested scene, outfit, pose, camera and lighting.";
 
   try{
     const ai=new GoogleGenAI({apiKey:process.env.GEMINI_API_KEY});
     const interaction=await ai.interactions.create({
       model:"gemini-3.1-flash-image",
-      input:fullPrompt,
+      input:referencePart?[referencePart,{type:"text",text:fullPrompt}]:fullPrompt,
       response_format:{
         type:"image",
         mime_type:"image/png",
