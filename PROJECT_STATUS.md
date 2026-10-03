@@ -2,15 +2,28 @@
 
 Updated: 2026-10-04
 
+## Core product definition
+- This is a face-first AI Model & Fan Studio, not a generic prompt-only image generator.
+- Main flow: select/create fictional adult identity → configure Visual DNA and face reference → generate content with the same identity reference → review/save assets → later approve/schedule/publish to connected social channels.
+- Each model is intended to have its own identity workspace, content history and social publishing configuration.
+- Social connections, publishing approvals/scheduling, fan memberships/subscriptions and live social analytics are product requirements, not yet verified features.
+
+## Latest implementation changes
+- Added consent-gated reference-image payload handling to `/api/generate`; accepts PNG/JPEG/WebP data URLs under the configured size limit and passes image + prompt to Gemini Interactions.
+- Added reference-photo preview and explicit permission/consent checkbox to the Image Studio.
+- The latest generated image is held as a per-model in-memory identity reference for subsequent image requests during the current browser session. This is session-only, not persistent face-lock or cloud storage.
+- Updated the frontend to send stable model IDs to the API.
+- Official Google image-generation docs provide the Gemini 3.1 Flash Image Interactions multimodal input pattern used here.
+
 ## Redesign work in progress
 - Reworked `public/app.js` into separate Discover Models, Create Model, Content Studio, My Models and Asset Library views.
 - Replaced CSS-drawn cartoon face placeholders with neutral identity-template tiles and an explicit notice that final portrait assets are not yet generated.
 - Added Visual DNA fields for adult age, gender presentation, height, chest/bust, waist, hips, body build, skin tone, face shape, eye colour and hair.
 - Added live profile summary and browser-local saving for custom models/edited DNA; this is not cloud persistence.
-- Reworked Content Studio around an active identity panel, image-generation request status, camera/lighting settings, output preview and save-image action.
+- Reworked Content Studio around an active identity panel, image-generation request status, camera/lighting settings, reference preview, consent, output preview and save-image action.
 - Only Create Image is connected in the backend; other media modes are visibly marked provider-pending.
 - JavaScript syntax was checked with V8 `new Function(...)` after correcting a syntax error; parse check passed.
-- Latest UI commits: `1fb7385e0310968366bea787dca8da186e2cd8ea`, `ce7d7742b2891ec8077326011ac97eb5fa988ea6`, `6683a3e2f35a654ea1657d2bc3aa252072c8fd68`, `3c42f41f1ed1e0fe0ab78e861dea22a29b609a2d`, `28b7628513b50330cb48cc3b1d23db1f984c36aa`.
+- Latest UI commits: `1fb7385e0310968366bea787dca8da186e2cd8ea`, `ce7d7742b2891ec8077326011ac97eb5fa988ea6`, `6683a3e2f35a654ea1657d2bc3aa252072c8fd68`, `3c42f41f1ed1e0fe0ab78e861dea22a29b609a2d`, `28b7628513b50330cb48cc3b1d23db1f984c36aa`, `cbb91131f1ef27e3ceba0120d8d8bc4d85757b2d`, `32a2b17599069d18f0bb38c8afa1e55387034a22`, `867762c6a9d9d4025362b07787c1cf8a8a78642f`, `ae55d7ccec019412623cdd71c7dd0fead47faf22`.
 - Image Studio now opens with a starter fictional-adult portrait prompt, so a user can generate a first portrait without composing a prompt from scratch; the prompt remains editable.
 
 ## Latest issue / fix
@@ -26,9 +39,9 @@ Updated: 2026-10-04
 - 50 fictional adult identity template records seeded; final photorealistic portraits are not available yet.
 - Ready identity selection does not require a user photo upload.
 - Free Generate flow does not require model selection.
-- Optional reference photo upload control is present but image bytes are not sent to the provider yet.
+- Optional PNG/JPEG/WebP reference upload now previews locally and is sent to Gemini with explicit permission/consent confirmation.
 - Image, Video, Image-to-Video, Edit, Upscale, Trend/Motion and Frame-to-Frame interface options are present; only Create Image has a backend path.
-- Visual DNA and live form feedback are present in the redesigned UI; persistent face-lock is not implemented.
+- Visual DNA and live form feedback are present; a generated image can be reused as the next request's reference for the same model within the current browser session. Persistent face-lock is not implemented.
 - Gemini server adapter added for Create Image.
 - Previous Gemini integration deployment was live, but it is superseded by newer commits; current deployment must be checked.
 - Current image model configured in code: Gemini 3.1 Flash Image.
@@ -37,17 +50,17 @@ Updated: 2026-10-04
 - Public HTTP endpoint could not be independently called from this tool environment.
 - A real end-to-end Gemini image generation request has NOT been independently verified from this environment.
 - Google currently lists Gemini 3.1 Flash Image with no Free Tier; production API image generation may require paid billing. Gemini 2.5 Flash Image is no longer the current choice and Google lists it as shut down/deprecated.
-- Reference photo bytes are not yet sent to Gemini; current Create Image path is prompt-based.
+- Reference-photo conditioning code is committed but a real reference-to-image end-to-end request has not yet been verified.
 - 50 final photorealistic portrait assets are NOT yet generated; current cards use UI placeholders.
 - Persistent storage, authentication, billing, social publishing and identity persistence remain pending.
 
 ## Current truth
-The redesigned frontend is committed and passes a JavaScript syntax parse check. Render deployment and public-page rendering are not yet verified. The web preview tool could not access the public URL during this check. It is not a finished live-model product: the 50 photorealistic portraits, reference-photo conditioning, persistent identity lock, cloud asset storage, and non-image media providers remain outstanding. Real image output must be confirmed by an actual public request.
+The redesigned frontend and consent-gated reference-image conditioning are committed; JavaScript syntax parsing passed after the frontend changes. Render deployment and public-page rendering of the latest commits are not yet verified. The web preview tool could not access the public URL during this check. It is not a finished live-model product: the 50 photorealistic portraits, reference-photo conditioning, persistent identity lock, cloud asset storage, and non-image media providers remain outstanding. Real image output must be confirmed by an actual public request.
 
 ## Exact next steps
 1. Verify Render deploys the redesigned frontend commit and open the public website to confirm it renders.
 2. Test the Create Image endpoint end-to-end and record any exact Gemini error.
-3. Confirm current Gemini multimodal image-conditioning API, then implement reference-photo conditioning with authorization checks.
+3. Verify the newly committed reference-photo conditioning through an actual public request, including consent and image type/size rejection.
 4. Generate and store actual fictional adult portraits for the 50 templates; remove any template from 'ready' status until its portrait exists.
 5. Implement persistent Visual DNA/identity-lock assets and cloud-backed My Models/Asset Library.
 6. Connect and test video, image-to-video, edit, upscale, trend/motion and frame-to-frame providers.
