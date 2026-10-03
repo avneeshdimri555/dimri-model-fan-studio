@@ -2,6 +2,14 @@
 
 Updated: 2026-10-04
 
+## Additional face-first implementation
+- The reference photo is previewed before generation, requires a permission/consent checkbox, and is included in the Gemini request as an image input.
+- When a model receives a successful generation, that generated image is reused as its next image request reference during the current browser session only.
+- Generated portraits are displayed in that model's card and profile while the session is active; ungenerated cards display a neutral text placeholder rather than a cartoon/avatar.
+- Added outfit, pose, location and expression selectors to image-shoot settings; their values are included in the generation prompt.
+- Frontend JavaScript parse check passed after these updates.
+- Recent commits: `cbb91131f1ef27e3ceba0120d8d8bc4d85757b2d`, `32a2b17599069d18f0bb38c8afa1e55387034a22`, `867762c6a9d9d4025362b07787c1cf8a8a78642f`, `ae55d7ccec019412623cdd71c7dd0fead47faf22`, `bf4e8322a7ceca7958ed0044316b7e15bfbd9abc`, `dc910fb81223b102310958bb46f2271008633159`.
+
 ## Core product definition
 - This is a face-first AI Model & Fan Studio, not a generic prompt-only image generator.
 - Main flow: select/create fictional adult identity → configure Visual DNA and face reference → generate content with the same identity reference → review/save assets → later approve/schedule/publish to connected social channels.
@@ -55,10 +63,10 @@ Updated: 2026-10-04
 - Persistent storage, authentication, billing, social publishing and identity persistence remain pending.
 
 ## Current truth
-The redesigned frontend and consent-gated reference-image conditioning are committed; JavaScript syntax parsing passed after the frontend changes. Render deployment and public-page rendering of the latest commits are not yet verified. The web preview tool could not access the public URL during this check. It is not a finished live-model product: the 50 photorealistic portraits, reference-photo conditioning, persistent identity lock, cloud asset storage, and non-image media providers remain outstanding. Real image output must be confirmed by an actual public request.
+The redesigned frontend and consent-gated reference-image conditioning are committed; JavaScript syntax parsing passed after the frontend changes. Render has deployed some intermediate updates, while the newest shoot-control commit is awaiting live verification. The web preview tool could not access the public URL during this check. It is not a finished live-model product: the 50 photorealistic portraits, reference-photo conditioning, persistent identity lock, cloud asset storage, and non-image media providers remain outstanding. Real image output must be confirmed by an actual public request.
 
 ## Exact next steps
-1. Verify Render deploys the redesigned frontend commit and open the public website to confirm it renders.
+1. Verify Render deploys the newest shoot-control commit and open the public website to confirm it renders.
 2. Test the Create Image endpoint end-to-end and record any exact Gemini error.
 3. Verify the newly committed reference-photo conditioning through an actual public request, including consent and image type/size rejection.
 4. Generate and store actual fictional adult portraits for the 50 templates; remove any template from 'ready' status until its portrait exists.
