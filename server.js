@@ -11,7 +11,7 @@ app.use(express.static(path.join(__dirname,"public")));
 app.get("/api/health",(req,res)=>res.json({
   ok:true,
   service:"DIMRI Model & Fan Studio",
-  version:"0.3.0",
+  version:"0.3.1",
   imageProvider:process.env.GEMINI_API_KEY?"gemini_configured":"not_configured",
   videoProvider:"not_configured"
 }));
@@ -42,7 +42,7 @@ app.post("/api/generate",async(req,res)=>{
   try{
     const ai=new GoogleGenAI({apiKey:process.env.GEMINI_API_KEY});
     const interaction=await ai.interactions.create({
-      model:"gemini-2.5-flash-image",
+      model:"gemini-3.1-flash-image",
       input:fullPrompt,
       response_format:{
         type:"image",
