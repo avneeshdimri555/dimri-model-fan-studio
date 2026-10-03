@@ -5,8 +5,9 @@ Updated: 2026-10-04
 ## Model business workflow — latest changes
 - New identities now receive sequential model IDs after the 50 seeded identity templates (for example model-51, model-52), and remain in the Discover/My Models lists after browser-local save.
 - Each identity profile now has its own Instagram username/profile URL fields and audience log fields for followers, likes, comments and reach. These figures are explicitly manual entries saved to this browser; they are NOT live Instagram analytics.
-- Added a comment reply drafting helper with tone/language options and copy action. It creates local canned drafts only; it does NOT read Instagram comments, call an AI reply service, or publish replies.
+- Added a comment reply drafting helper with tone/language options and copy action. Added up to 30 manually saved audience snapshots per model. It creates local canned drafts only; it does NOT read Instagram comments, call an AI reply service, or publish replies.
 - Added model profile JSON export.
+- Added per-model audience snapshot history (up to 30 browser-local entries), explicitly labeled manual snapshots rather than live API data.
 - Instagram OAuth connection, automatic daily publishing, live insights, comment/DM ingestion, AI-generated replies, subscription checkout and premium content delivery remain unimplemented and require official provider credentials, backend integration, secure persistent storage and compliance review.
 - Current web app remains a Render-hosted website; no Cloudflare deployment or Cloudflare integration has been provisioned. Moving this app to Cloudflare would be a separate hosting migration, not an automatic Gemini fallback.
 
@@ -48,7 +49,7 @@ Updated: 2026-10-04
 - Replaced those sequences with real line breaks in commit `bca0bcaf203f81e0f2e018c10ce31fe25084fb10`; later redesign rewrote the frontend.
 - The frontend has also had a separate generation-workspace syntax error corrected in commit `3c42f41f1ed1e0fe0ab78e861dea22a29b609a2d` and passed a JavaScript parse check.
 - Latest social panel frontend syntax check passed after correcting template interpolation in commit `c5cbe0a99dd3c0b153c9aa35c1dd9af9424154a8`.
-- Sequential model numbering added in commit `0693a59dc0b328fc94ecf01660d30771c36f9353`.
+- Sequential model numbering added in commit `0693a59dc0b328fc94ecf01660d30771c36f9353`, `4b8fa040f1165f1e926fad51536f7afc2c80fa77`, `4ccf37225a0ea47cbb3862adc5de7cff3f6aefe9`.
 - Render deployment and public-browser verification of the redesign are pending.
 
 ## Verified completed
