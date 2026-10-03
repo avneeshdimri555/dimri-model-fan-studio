@@ -59,7 +59,7 @@ Updated: 2026-10-04
 - The frontend has also had a separate generation-workspace syntax error corrected in commit `3c42f41f1ed1e0fe0ab78e861dea22a29b609a2d` and passed a JavaScript parse check.
 - Latest social panel frontend syntax check passed after correcting template interpolation in commit `c5cbe0a99dd3c0b153c9aa35c1dd9af9424154a8`.
 - Sequential model numbering added in commit `0693a59dc0b328fc94ecf01660d30771c36f9353`, `4b8fa040f1165f1e926fad51536f7afc2c80fa77`, `4ccf37225a0ea47cbb3862adc5de7cff3f6aefe9`.
-- Render deployment and public-browser verification of the redesign are pending.
+- Render deployment for the latest integration commit is verified live; public-browser verification of the redesign is still pending.
 
 ## Verified completed
 - Dedicated GitHub repository verified: avneeshdimri555/dimri-model-fan-studio
@@ -86,7 +86,7 @@ Updated: 2026-10-04
 The redesigned frontend, consent-gated reference conditioning, per-model social/audience log UI, reply-draft helper, JSON export and sequential model numbering are committed; the current app.js passes a JavaScript syntax parse check. Render deployment of the latest commits and public-browser rendering remain to be verified. Social integrations and real image output have not passed end-to-end tests. The web preview tool could not access the public URL during this check. It is not a finished live-model product: the 50 photorealistic portraits, reference-photo conditioning, persistent identity lock, cloud asset storage, and non-image media providers remain outstanding. Real image output must be confirmed by an actual public request.
 
 ## Exact next steps
-1. Verify Render deploys the latest social-panel and model-numbering commits and open the public website to confirm it renders.
+1. Render deploy `dep-db0mckhh83ns73ctn7ng` for commit `8e7bf669db1184d84eb86f3164851fd67cd7e5ef` is verified `live`; still open the public website in a real browser and confirm it renders.
 2. Test the Create Image endpoint end-to-end and record any exact Gemini error.
 3. Verify the newly committed reference-photo conditioning through an actual public request, including consent and image type/size rejection.
 4. Generate and store actual fictional adult portraits for the 50 templates; remove any template from 'ready' status until its portrait exists.
