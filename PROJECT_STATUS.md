@@ -253,3 +253,10 @@ The redesigned frontend, consent-gated reference conditioning, per-model social/
 - Updated the Gemini image response format in `server.js` to explicitly request `mime_type: "image/jpeg"` while preserving the selected aspect ratio and 1K image size.
 - Commit: `3733ce181bdb7e29d9a2716c8daabf96e0df49fa`.
 - **Pending verification:** Render deployment for this commit and a real Gemini request, including an authorized reference image. This code correction is not yet proof that image generation or identity consistency works.
+
+
+## SDK compatibility fix from live provider error — 2026-10-05
+- Latest user screenshot reports Gemini's legacy Interactions API schema is no longer supported and explicitly requests upgrading `@google/genai` to SDK version `2.0.0` or later. It also shows provider account/billing failures: OpenAI reports no credits, fal.ai reports user locked, Replicate indicates top-up/account restriction, and Pollinations returns HTTP 403.
+- Updated `package.json` from `@google/genai ^1.16.0` to `^2.0.0` to meet the SDK minimum stated by the provider error. Commit: `d736f074bb6972f7681af42a5b400bd3f35028e0`.
+- Render auto-deploy is configured; install/build/live deployment after this commit remains pending verification. This dependency bump alone does not resolve exhausted credits, billing/entitlement restrictions, Pollinations 403, or guarantee the existing Interactions request schema remains compatible.
+- Required next checks: confirm Render installs SDK v2 and starts; inspect latest Gemini SDK Interactions API compatibility; only then retry one low-cost text-to-image call and one consented reference-image call if an eligible provider balance is available. Do not automatically incur charges or represent unavailable providers as active.
