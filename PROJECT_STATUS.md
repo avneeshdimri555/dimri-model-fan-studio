@@ -150,3 +150,11 @@ The redesigned frontend, consent-gated reference conditioning, per-model social/
 - Current image generation backend remains Gemini-only and requires `GEMINI_API_KEY` in Render. No fallback provider keys/accounts are connected; do not represent multi-provider failover as implemented.
 - No project-specific cloud database is attached. User-created model profiles remain browser-local; durable multi-device/cloud identity storage is still pending and must use a separate project datastore.
 - Exact next steps: run real-browser checks for 50-card gallery, create/save/reopen custom identity, edit and reload Visual DNA, test first Gemini portrait and subsequent reference-conditioned generation; inspect Render health endpoint and logs; only then update completion status. Obtain provider credentials and choose separate persistent storage only if needed, without reusing other DIMRI projects' database.
+
+
+## Gemini MIME hotfix — 2026-10-04
+- User screenshot showed Gemini HTTP 400: `image/png` is not accepted for `response_format.mime_type`; the error reports `image/jpeg` as the supported value.
+- Updated `server.js` to request `image/jpeg` from Gemini 3.1 Flash Image and label the returned base64 image as `data:image/jpeg`.
+- Commit: `ee63a839942c0700b6f110d89c8ced2f724221f2`. Render auto-deploy is expected because the service is configured for main-branch auto-deploy; deployment must still be checked.
+- Pollinations returned HTTP 403 in the user's screenshot. Its fallback request remains unverified; do not call it connected until its credentials/request are confirmed by a successful response.
+- This patch addresses the visible Gemini MIME rejection only. Reference-conditioned face consistency still requires a successful real request using an authorized adult reference, and is not guaranteed to be a perfect face clone. Browser-based end-to-end verification remains pending.
