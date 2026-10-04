@@ -288,6 +288,6 @@ window.dimriBuildContextPrompt=dimriBuildContextPrompt;
 nav=function(view){
   const html=DIMRI_ORIGINAL_NAV_HTML(view);
   const active=view==="prompts"?" active":"";
-  const button='<button class="nav-btn'+active+'" onclick="navigate(\\'prompts\\')"><span class="nav-icon">⌘</span><span>Prompt Library</span><small>100</small></button>';
+  const button="<button class=\"nav-btn"+active+"\" onclick=\"navigate('prompts')\"><span class=\"nav-icon\">⌘</span><span>Prompt Library</span><small>100</small></button>";
   return html.replace("</nav>",button+"</nav>");
 };
