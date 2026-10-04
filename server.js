@@ -44,13 +44,40 @@ function imageFormat(aspectRatio){
   return allowed.includes(aspectRatio)?aspectRatio:"9:16";
 }
 
+app.get("/api/providers",(_req,res)=>{
+  res.json({
+    ok:true,
+    providers:[
+      {id:"gemini",name:"Google Gemini",configured:Boolean(process.env.GEMINI_API_KEY),role:"primary"},
+      {id:"pollinations",name:"Pollinations",configured:Boolean(process.env.POLLINATIONS_API_KEY),role:"fallback"}
+    ]
+  });
+});
+
+async function generateWithPollinations(fullPrompt,settings){
+  if(!process.env.POLLINATIONS_API_KEY)throw new Error("Pollinations fallback is not configured.");
+  const model=process.env.POLLINATIONS_IMAGE_MODEL||"black-forest-labs/flux.1-schnell";
+  const params=new URLSearchParams({model});
+  if(settings.aspectRatio==="9:16")params.set("width","768"),params.set("height","1365");
+  else if(settings.aspectRatio==="4:5")params.set("width","1024"),params.set("height","1280");
+  else if(settings.aspectRatio==="16:9")params.set("width","1365"),params.set("height","768");
+  else params.set("width","1024"),params.set("height","1024");
+  const url="https://gen.pollinations.ai/image/"+encodeURIComponent(fullPrompt)+"?"+params.toString();
+  const response=await fetch(url,{headers:{Authorization:"Bearer "+process.env.POLLINATIONS_API_KEY}});
+  if(!response.ok)throw new Error("Pollinations HTTP "+response.status);
+  const mime=response.headers.get("content-type")||"image/jpeg";
+  const buffer=Buffer.from(await response.arrayBuffer());
+  if(!buffer.length)throw new Error("Pollinations returned an empty image.");
+  return "data:"+mime+";base64,"+buffer.toString("base64");
+}
+
 app.post("/api/generate",async(req,res)=>{
   const {mode="free",modelId=null,prompt="",settings={},referenceImage=null,referenceConsent=false}=req.body||{};
   if(typeof prompt!=="string"||!prompt.trim())return res.status(400).json({ok:false,error:"Prompt is required"});
   const mediaMode=settings.mediaMode||"Create Image";
   if(mediaMode!=="Create Image")return res.status(501).json({
     ok:false,status:"provider_pending",
-    message:"This mode is not connected yet. Real Gemini image generation is enabled for Create Image."
+    message:"This mode is not connected yet. Create Image is the active face-model workflow."
   });
   if(referenceImage && referenceConsent!==true)return res.status(400).json({ok:false,error:"Confirm you have permission and consent to use this reference image."});
   let referencePart=null;
@@ -60,45 +87,51 @@ app.post("/api/generate",async(req,res)=>{
     if(!match)return res.status(400).json({ok:false,error:"Use a PNG, JPEG or WebP reference image."});
     referencePart={type:"image",mime_type:match[1],data:match[2]};
   }
-  if(!process.env.GEMINI_API_KEY)return res.status(503).json({
-    ok:false,status:"provider_not_configured",
-    message:"Gemini image provider is not configured. Add GEMINI_API_KEY in Render Environment."
-  });
 
   const identity=modelId
     ? "Create an original fictional adult AI model identity named "+String(modelId)+". Keep the person's facial identity, age presentation, skin tone, eye colour, hair and proportions consistent with the supplied reference image when present. "
     : "Create an original fictional adult AI model. ";
   const fullPrompt=identity+prompt.trim()+" Style: "+String(settings.style||"Photorealistic")+". Do not depict a real public figure or impersonate a real person. If a reference image is provided, use it only as an authorized appearance reference and preserve the same adult person's recognizable facial identity; change only the requested scene, outfit, pose, camera and lighting.";
 
-  try{
-    const ai=new GoogleGenAI({apiKey:process.env.GEMINI_API_KEY});
-    const interaction=await ai.interactions.create({
-      model:"gemini-3.1-flash-image",
-      input:referencePart?[referencePart,{type:"text",text:fullPrompt}]:fullPrompt,
-      response_format:{
-        type:"image",
-        mime_type:"image/png",
-        aspect_ratio:imageFormat(settings.aspectRatio),
-        image_size:"1K"
-      }
-    });
-    let image=null;
-    for(const step of interaction?.steps||[]){for(const block of step?.content||[]){if(block?.type==="image"&&block?.data){image=block.data;break}}if(image)break}
-    if(!image&&interaction?.output_image?.data)image=interaction.output_image.data;
-    if(!image)return res.status(502).json({
-      ok:false,status:"provider_error",
-      message:"Gemini returned no image. Please try again."
-    });
-    res.json({
-      ok:true,status:"completed",provider:"gemini",
-      mode,modelId,
-      imageDataUrl:"data:image/png;base64,"+image
-    });
-  }catch(error){
-    const message=error?.message||"Gemini image generation failed.";
-    console.error("Gemini generation error:",message);
-    res.status(502).json({ok:false,status:"provider_error",message});
-  }
+  const errors=[];
+  if(process.env.GEMINI_API_KEY){
+    try{
+      const ai=new GoogleGenAI({apiKey:process.env.GEMINI_API_KEY});
+      const interaction=await ai.interactions.create({
+        model:"gemini-3.1-flash-image",
+        input:referencePart?[referencePart,{type:"text",text:fullPrompt}]:fullPrompt,
+        response_format:{type:"image",mime_type:"image/png",aspect_ratio:imageFormat(settings.aspectRatio),image_size:"1K"}
+      });
+      let image=null;
+      for(const step of interaction?.steps||[]){for(const block of step?.content||[]){if(block?.type==="image"&&block?.data){image=block.data;break}}if(image)break}
+      if(!image&&interaction?.output_image?.data)image=interaction.output_image.data;
+      if(image)return res.json({ok:true,status:"completed",provider:"gemini",mode,modelId,imageDataUrl:"data:image/png;base64,"+image});
+      errors.push("Gemini returned no image");
+    }catch(error){
+      const message=error?.message||"Gemini image generation failed.";
+      console.error("Gemini generation error:",message);
+      errors.push("Gemini: "+message);
+    }
+  }else errors.push("Gemini key not configured");
+
+  // Fallback is deliberately disabled for reference-image requests because a text-only fallback cannot guarantee identity preservation.
+  if(!referencePart && process.env.POLLINATIONS_API_KEY){
+    try{
+      const imageDataUrl=await generateWithPollinations(fullPrompt,settings);
+      return res.json({ok:true,status:"completed",provider:"pollinations",mode,modelId,imageDataUrl});
+    }catch(error){
+      const message=error?.message||"Pollinations generation failed.";
+      console.error("Pollinations generation error:",message);
+      errors.push("Pollinations: "+message);
+    }
+  }else if(referencePart && process.env.POLLINATIONS_API_KEY){
+    errors.push("Pollinations fallback skipped for reference-image requests to protect face consistency");
+  }else errors.push("Pollinations fallback key not configured");
+
+  return res.status(503).json({
+    ok:false,status:"provider_not_available",
+    message:"No image provider completed this request. "+errors.join(" · ")
+  });
 });
 
 app.use((req,res,next)=>{if(req.method!=="GET")return next();res.sendFile(path.join(__dirname,"public","index.html"))});
