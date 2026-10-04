@@ -233,3 +233,16 @@ The redesigned frontend, consent-gated reference conditioning, per-model social/
 - Expanded the DNA summary so these values are included in the frontend's generation prompt. This remains prompt conditioning, not a pixel-level image editor or guaranteed identity lock.
 - JavaScript syntax parse passed using `new Function(appJs)`; required DNA control identifiers were present. This is a source parse/structure check only; no real browser interaction or AI generation E2E test was performed.
 - Code commit: `afabd57cb879b381101068f4e7aa67326e68bf7b`; cache-bust commit: `8b45b8a01b61a8b92990c6b3a1cf6a55a2ae6836`. Render auto-deploy is enabled, but both commits' final deployment state must be checked before claiming this DNA expansion is live.
+
+
+## Model Creation Upgrade — 2026-10-04
+- Added a context-aware professional photography prompt engine with **100 templates** across Portrait, Beauty, Fashion, Lifestyle, Street, Travel, Fitness, Business, Cinematic and Macro categories.
+- Added Model-DNA-aware prompt construction covering adult identity, facial structure, eyes, skin texture, hair, body proportions, photographic realism, camera, lighting, composition and negative constraints.
+- Added Prompt Library navigation plus copyable prompts and studio actions for random template selection and Model DNA prompt construction.
+- Added generation-tool styling for the new prompt workflow.
+- Existing Model DNA UI already contains detailed facial/skin/hair controls and browser-local persistence; this upgrade feeds those fields into generation prompts.
+- JavaScript syntax was re-checked after the upgrade and passed.
+- **Not verified yet:** real browser interaction, successful provider generation, reference-conditioned identity consistency, cloud database persistence, authentication, billing, video/edit/upscale providers, and multi-device model persistence.
+- Provider credentials must never be committed to GitHub or exposed in frontend code. Environment-variable presence is not equivalent to provider authentication success.
+- Next priority: verify the live deployment, then run the real Model Creation → Model DNA → first portrait → second reference-conditioned generation workflow and record actual results.
+
