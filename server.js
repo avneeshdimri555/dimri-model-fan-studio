@@ -36,6 +36,8 @@ app.get("/api/health",(req,res)=>res.json({
   service:"DIMRI Model & Fan Studio",
   version:"0.3.1",
   imageProvider:process.env.GEMINI_API_KEY?"gemini_configured":"not_configured",
+  imageFallbacks:{openai:Boolean(process.env.OPENAI_API_KEY),fal:Boolean(process.env.FAL_KEY),replicate:Boolean(process.env.REPLICATE_API_TOKEN),pollinations:Boolean(process.env.POLLINATIONS_API_KEY)},
+  voiceProvider:process.env.ELEVENLABS_API_KEY?"elevenlabs_configured":"not_configured",
   videoProvider:"not_configured"
 }));
 
@@ -48,11 +50,65 @@ app.get("/api/providers",(_req,res)=>{
   res.json({
     ok:true,
     providers:[
-      {id:"gemini",name:"Google Gemini",configured:Boolean(process.env.GEMINI_API_KEY),role:"primary"},
-      {id:"pollinations",name:"Pollinations",configured:Boolean(process.env.POLLINATIONS_API_KEY),role:"fallback"}
+      {id:"gemini",name:"Google Gemini",configured:Boolean(process.env.GEMINI_API_KEY),role:"primary_identity"},
+      {id:"openai",name:"OpenAI Images",configured:Boolean(process.env.OPENAI_API_KEY),role:"fallback_image"},
+      {id:"fal",name:"fal.ai",configured:Boolean(process.env.FAL_KEY),role:"fallback_image"},
+      {id:"replicate",name:"Replicate",configured:Boolean(process.env.REPLICATE_API_TOKEN),role:"fallback_image"},
+      {id:"pollinations",name:"Pollinations",configured:Boolean(process.env.POLLINATIONS_API_KEY),role:"last_resort_image"},
+      {id:"elevenlabs",name:"ElevenLabs",configured:Boolean(process.env.ELEVENLABS_API_KEY),role:"voice"}
     ]
   });
 });
+
+async function bufferToDataUrl(response){
+  if(!response.ok)throw new Error((await response.text().catch(()=>""))||("HTTP "+response.status));
+  const mime=response.headers.get("content-type")||"image/png";
+  const buffer=Buffer.from(await response.arrayBuffer());
+  if(!buffer.length)throw new Error("Provider returned an empty image.");
+  return "data:"+mime.split(";")[0]+";base64,"+buffer.toString("base64");
+}
+async function generateWithOpenAI(fullPrompt,settings){
+  if(!process.env.OPENAI_API_KEY)throw new Error("OpenAI key not configured.");
+  const model=process.env.OPENAI_IMAGE_MODEL||"gpt-image-1";
+  const size=settings.aspectRatio==="9:16"?"1024x1536":settings.aspectRatio==="16:9"?"1536x1024":"1024x1024";
+  const response=await fetch("https://api.openai.com/v1/images/generations",{method:"POST",headers:{"Authorization":"Bearer "+process.env.OPENAI_API_KEY,"Content-Type":"application/json"},body:JSON.stringify({model,prompt:fullPrompt,size,n:1})});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data?.error?.message||"OpenAI HTTP "+response.status);
+  const b64=data?.data?.[0]?.b64_json;
+  const url=data?.data?.[0]?.url;
+  if(b64)return "data:image/png;base64,"+b64;
+  if(url)return bufferToDataUrl(await fetch(url));
+  throw new Error("OpenAI returned no image data.");
+}
+async function generateWithFal(fullPrompt,settings){
+  if(!process.env.FAL_KEY)throw new Error("FAL key not configured.");
+  const model=process.env.FAL_IMAGE_MODEL||"fal-ai/flux/schnell";
+  const response=await fetch("https://fal.run/"+model,{method:"POST",headers:{Authorization:"Key "+process.env.FAL_KEY,"Content-Type":"application/json"},body:JSON.stringify({prompt:fullPrompt,image_size:settings.aspectRatio==="9:16"?"portrait_4_3":settings.aspectRatio==="16:9"?"landscape_4_3":"square_hd"})});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data?.detail||data?.error||"fal.ai HTTP "+response.status);
+  const url=data?.images?.[0]?.url||data?.image?.url;
+  if(!url)throw new Error("fal.ai returned no image URL.");
+  return bufferToDataUrl(await fetch(url));
+}
+async function generateWithReplicate(fullPrompt,settings){
+  if(!process.env.REPLICATE_API_TOKEN)throw new Error("Replicate key not configured.");
+  const model=process.env.REPLICATE_IMAGE_MODEL||"black-forest-labs/flux-schnell";
+  const response=await fetch("https://api.replicate.com/v1/models/"+model+"/predictions",{method:"POST",headers:{Authorization:"Bearer "+process.env.REPLICATE_API_TOKEN,"Content-Type":"application/json","Prefer":"wait"},body:JSON.stringify({input:{prompt:fullPrompt,aspect_ratio:settings.aspectRatio||"1:1"}})});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data?.detail||"Replicate HTTP "+response.status);
+  let prediction=data;
+  for(let attempt=0;attempt<20 && prediction.status!=="succeeded" && prediction.status!=="failed" && prediction.status!=="canceled";attempt++){
+    if(prediction.status==="starting"||prediction.status==="processing")await new Promise(resolve=>setTimeout(resolve,1500));
+    if(prediction.status!=="succeeded"&&prediction.status!=="failed"&&prediction.status!=="canceled"){
+      const poll=await fetch(prediction.urls?.get||("https://api.replicate.com/v1/predictions/"+prediction.id),{headers:{Authorization:"Bearer "+process.env.REPLICATE_API_TOKEN}});
+      prediction=await poll.json().catch(()=>prediction);
+    }
+  }
+  if(prediction.status!=="succeeded")throw new Error(prediction.error||"Replicate prediction did not complete.");
+  const output=Array.isArray(prediction.output)?prediction.output[0]:prediction.output;
+  if(!output)throw new Error("Replicate returned no image output.");
+  return bufferToDataUrl(await fetch(String(output)));
+}
 
 async function generateWithPollinations(fullPrompt,settings){
   if(!process.env.POLLINATIONS_API_KEY)throw new Error("Pollinations fallback is not configured.");
@@ -100,12 +156,12 @@ app.post("/api/generate",async(req,res)=>{
       const interaction=await ai.interactions.create({
         model:"gemini-3.1-flash-image",
         input:referencePart?[referencePart,{type:"text",text:fullPrompt}]:fullPrompt,
-        response_format:{type:"image",mime_type:"image/jpeg",aspect_ratio:imageFormat(settings.aspectRatio),image_size:"1K"}
+        response_format:{type:"image",aspect_ratio:imageFormat(settings.aspectRatio),image_size:"1K"}
       });
       let image=null;
       for(const step of interaction?.steps||[]){for(const block of step?.content||[]){if(block?.type==="image"&&block?.data){image=block.data;break}}if(image)break}
       if(!image&&interaction?.output_image?.data)image=interaction.output_image.data;
-      if(image)return res.json({ok:true,status:"completed",provider:"gemini",mode,modelId,imageDataUrl:"data:image/jpeg;base64,"+image});
+      if(image){const outputMime=interaction?.output_image?.mime_type||"image/png";return res.json({ok:true,status:"completed",provider:"gemini",mode,modelId,imageDataUrl:"data:"+outputMime+";base64,"+image});}
       errors.push("Gemini returned no image");
     }catch(error){
       const message=error?.message||"Gemini image generation failed.";
@@ -113,6 +169,19 @@ app.post("/api/generate",async(req,res)=>{
       errors.push("Gemini: "+message);
     }
   }else errors.push("Gemini key not configured");
+
+  // Reference-conditioned requests stay on Gemini: generic fallback providers are text-to-image and cannot promise identity consistency.
+  if(!referencePart){
+    const fallbacks=[
+      ["openai",()=>generateWithOpenAI(fullPrompt,settings)],
+      ["fal.ai",()=>generateWithFal(fullPrompt,settings)],
+      ["replicate",()=>generateWithReplicate(fullPrompt,settings)]
+    ];
+    for(const [provider,run] of fallbacks){
+      try{const imageDataUrl=await run();return res.json({ok:true,status:"completed",provider,mode,modelId,imageDataUrl});}
+      catch(error){const message=error?.message||provider+" generation failed.";console.error(provider+" generation error:",message);errors.push(provider+": "+message)}
+    }
+  }
 
   // Fallback is deliberately disabled for reference-image requests because a text-only fallback cannot guarantee identity preservation.
   if(!referencePart && process.env.POLLINATIONS_API_KEY){
