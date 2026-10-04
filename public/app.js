@@ -62,19 +62,24 @@ async function hydrateIdentityReferences(){
  try{
   const db=await openIdentityDB();
   const values=await new Promise((resolve,reject)=>{
-   const tx=db.transaction("references","readonly"),store=tx.objectStore("references");
-   const keys=store.getAllKeys(),data=store.getAll();
-   tx.oncomplete=()=>resolve({keys:keys.result||[],data:data.result||[]});
+   const tx=db.transaction(["faceReferences","portraits"],"readonly");
+   const refs=tx.objectStore("faceReferences").getAllKeys();
+   const refData=tx.objectStore("faceReferences").getAll();
+   const portraitKeys=tx.objectStore("portraits").getAllKeys();
+   const portraitData=tx.objectStore("portraits").getAll();
+   tx.oncomplete=()=>resolve({refKeys:refs.result||[],refData:refData.result||[],portraitKeys:portraitKeys.result||[],portraitData:portraitData.result||[]});
    tx.onerror=()=>reject(tx.error||new Error("Identity read failed"));
   });
-  const loaded=Object.fromEntries(values.keys.map((key,i)=>[key,values.data[i]]));
-  for(const [key,value] of Object.entries(faceReferences)){
-   if(!(key in loaded)&&typeof value==="string"&&value.startsWith("data:image/")){
-    try{await saveIdentityReference(key,value);loaded[key]=value}catch{}
+  faceReferences=Object.fromEntries(values.refKeys.map((key,i)=>[key,values.refData[i]]));
+  generatedPortraits=Object.fromEntries(values.portraitKeys.map((key,i)=>[key,values.portraitData[i]]));
+  const legacy=readStore("dimriIdentityReferences",{});
+  for(const [key,value] of Object.entries(legacy)){
+   if(!(key in faceReferences)&&typeof value==="string"&&value.startsWith("data:image/")){
+    try{await saveIdentityReference(key,value);faceReferences[key]=value}catch{}
    }
   }
-  faceReferences=loaded;
   try{localStorage.removeItem("dimriIdentityReferences")}catch{}
+  try{writeStore("dimriGeneratedPortraits",generatedPortraits)}catch{}
   db.close();
  }catch(error){console.warn("Identity reference storage unavailable:",error?.message||error)}
 }
