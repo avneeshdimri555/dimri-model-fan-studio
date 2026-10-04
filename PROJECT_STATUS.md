@@ -102,3 +102,10 @@ The redesigned frontend, consent-gated reference conditioning, per-model social/
 - The hero portrait is a CSS illustration, not a generated photorealistic model asset. Template cards remain neutral until actual portraits are generated.
 - Dashboard changes were committed to GitHub on main; Render auto-deploy is expected from the latest commit. Deployment and public browser rendering must be verified before marking the redesign live.
 - The dashboard does not make pending provider integrations, persistent storage, billing, or video modes complete.
+
+## Final visual correction pass — 2026-10-04
+- Removed the CSS cartoon face from the dashboard hero.
+- Removed remaining face-like placeholder construction from the model/create visual placeholders.
+- Model cards now clearly distinguish generated portraits from portrait-ready identity templates without pretending a portrait exists.
+- Create Model and dashboard visuals are now aligned to the Forest Green editorial direction.
+- Real photorealistic portrait assets are still not fabricated; they require actual image-generation execution/storage.
