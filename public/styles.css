@@ -163,3 +163,20 @@ linear-gradient(135deg,#172b1e,#203b29 52%,#101e16)}
 .page-head h1{max-width:950px}
 @media(min-width:1500px){.model-grid{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}.model-card-top{height:260px}}
 @media(max-width:900px){.main{width:100%;padding:22px 18px 44px}.model-grid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}}
+
+/* Identity gallery reliability + Forest Green visual consistency */
+body{background:radial-gradient(ellipse at 78% -14%,rgba(31,91,49,.26),transparent 48%),linear-gradient(130deg,#070d09,#09130c 68%,#0b170e)}
+.model-card{background:linear-gradient(150deg,#102017,#0b140e 80%);border-color:#25422d}
+.model-card:hover{border-color:#6ab77a;box-shadow:0 12px 30px #0005}
+.model-card-top,.model-card:nth-child(3n+2) .model-card-top,.model-card:nth-child(3n) .model-card-top{height:220px;background:radial-gradient(ellipse at 50% 110%,#285b36 0,transparent 58%),linear-gradient(135deg,#142b1a,#1c3521 58%,#203d27);border-bottom-color:#2d5035}
+.card-portrait{object-position:center 25%}
+.portrait-fallback,.profile-fallback{place-items:center;border-radius:50%;font-size:38px;font-weight:800;color:#dff7e3;background:linear-gradient(145deg,#39834b,#173a23);border:1px solid #83c99566;box-shadow:0 10px 35px #0005}
+.portrait-fallback{position:absolute;width:76px;height:76px;inset:50% auto auto 50%;transform:translate(-50%,-50%)}
+.profile-fallback{width:108px;height:108px}
+.profile-layout{grid-template-columns:minmax(300px,.9fr) minmax(500px,1.5fr);gap:18px}
+.profile-visual{background:linear-gradient(145deg,#102017,#0b140e);border-color:#25422d}
+.portrait-empty{height:clamp(420px,62vh,680px);background:radial-gradient(ellipse at 50% 70%,#204a2b 0,transparent 60%),linear-gradient(145deg,#122419,#0d180f);border-color:#35583b}
+.dna-panel,.social-panel,.create-form,.create-intro{background:linear-gradient(145deg,rgba(15,29,18,.97),rgba(9,19,11,.99));border-color:#25422d}
+.dna-live{background:#102017;border-color:#2d5035}
+@media(max-width:980px){.profile-layout{grid-template-columns:minmax(240px,.75fr) minmax(0,1.25fr)}.model-card-top{height:190px}}
+@media(max-width:720px){.model-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.model-card-top,.model-card:nth-child(3n+2) .model-card-top,.model-card:nth-child(3n) .model-card-top{height:180px}.profile-layout{grid-template-columns:1fr}.portrait-empty{height:420px}}
