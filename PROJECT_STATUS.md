@@ -246,3 +246,10 @@ The redesigned frontend, consent-gated reference conditioning, per-model social/
 - Provider credentials must never be committed to GitHub or exposed in frontend code. Environment-variable presence is not equivalent to provider authentication success.
 - Next priority: verify the live deployment, then run the real Model Creation → Model DNA → first portrait → second reference-conditioned generation workflow and record actual results.
 
+
+
+## Gemini image MIME error fix — 2026-10-04
+- User-provided live screenshot showed Gemini HTTP 400: `image/png` is unsupported for `response_format.mime_type`, with provider listing `image/jpeg` as supported; Pollinations returned HTTP 403.
+- Updated the Gemini image response format in `server.js` to explicitly request `mime_type: "image/jpeg"` while preserving the selected aspect ratio and 1K image size.
+- Commit: `3733ce181bdb7e29d9a2716c8daabf96e0df49fa`.
+- **Pending verification:** Render deployment for this commit and a real Gemini request, including an authorized reference image. This code correction is not yet proof that image generation or identity consistency works.
