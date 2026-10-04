@@ -153,16 +153,28 @@ app.post("/api/generate",async(req,res)=>{
   if(process.env.GEMINI_API_KEY){
     try{
       const ai=new GoogleGenAI({apiKey:process.env.GEMINI_API_KEY});
-      const interaction=await ai.interactions.create({
-        model:"gemini-3.1-flash-image",
-        input:referencePart?[referencePart,{type:"text",text:fullPrompt}]:fullPrompt,
-        response_format:{type:"image",mime_type:"image/jpeg",aspect_ratio:imageFormat(settings.aspectRatio),image_size:"1K"}
+      const parts=[];
+      if(referencePart)parts.push({inlineData:{mimeType:referencePart.mime_type,data:referencePart.data}});
+      parts.push({text:fullPrompt});
+      const response=await ai.models.generateContent({
+        model:process.env.GEMINI_IMAGE_MODEL||"gemini-3.1-flash-image",
+        contents:[{role:"user",parts}],
+        config:{
+          responseModalities:["IMAGE","TEXT"],
+          imageConfig:{aspectRatio:imageFormat(settings.aspectRatio),imageSize:"1K"}
+        }
       });
-      let image=null;
-      for(const step of interaction?.steps||[]){for(const block of step?.content||[]){if(block?.type==="image"&&block?.data){image=block.data;break}}if(image)break}
-      if(!image&&interaction?.output_image?.data)image=interaction.output_image.data;
-      if(image){const outputMime=interaction?.output_image?.mime_type||"image/png";return res.json({ok:true,status:"completed",provider:"gemini",mode,modelId,imageDataUrl:"data:"+outputMime+";base64,"+image});}
-      errors.push("Gemini returned no image");
+      let image=null,outputMime="image/png";
+      for(const candidate of response?.candidates||[]){
+        for(const part of candidate?.content?.parts||[]){
+          const inline=part?.inlineData||part?.inline_data;
+          if(inline?.data){image=inline.data;outputMime=inline.mimeType||inline.mime_type||"image/png";break}
+        }
+        if(image)break;
+      }
+      if(image)return res.json({ok:true,status:"completed",provider:"gemini",mode,modelId,imageDataUrl:"data:"+outputMime+";base64,"+image});
+      const providerText=(response?.candidates||[]).flatMap(c=>c?.content?.parts||[]).map(p=>p?.text).filter(Boolean).join(" ").slice(0,500);
+      errors.push("Gemini returned no image"+(providerText?": "+providerText:""));
     }catch(error){
       const message=error?.message||"Gemini image generation failed.";
       console.error("Gemini generation error:",message);
