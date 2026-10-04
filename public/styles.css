@@ -186,3 +186,24 @@ body{background:radial-gradient(ellipse at 78% -14%,rgba(31,91,49,.26),transpare
 .create-steps i{color:#a6efb3;background:#183b24}
 .dna-live{background:#102116;border-color:#2b5738}.dna-live b{color:#e0f8e5}
 .portrait-fallback{width:54px;height:54px;background:linear-gradient(145deg,#3b8650,#173b25);color:#e5ffea;border:1px solid #83c99566}
+
+
+/* DIMRI Forest Green Premium System — 2026-10-04 */
+:root{--bg:#06110a;--panel:#0b1a10;--panel2:#102318;--line:#21472e;--line2:#326342;--text:#f3faf4;--muted:#a7bbaa;--dim:#718c78;--cyan:#77e59a;--mint:#b4f5c4;--violet:#8fe0aa;--blue:#2c8b4d;--danger:#ff9d9d}
+body{background:radial-gradient(900px 520px at 76% -12%,rgba(31,103,55,.30),transparent 62%),radial-gradient(700px 500px at 10% 20%,rgba(18,72,39,.18),transparent 62%),#06110a;color:var(--text)}
+.sidebar{background:rgba(5,15,9,.94);border-right-color:#1d3b27;backdrop-filter:blur(18px)}
+.main{padding-left:clamp(22px,4vw,72px);padding-right:clamp(22px,4vw,72px)}
+.nav-btn{color:#9fb4a4}.nav-btn:hover{background:#102317;border-color:#234c31;color:#f4fff6}.nav-btn.active{background:linear-gradient(90deg,#153a22,#0c2414);border-color:#3b7b4c;color:#f3fff5;box-shadow:inset 2px 0 #7de69b,0 8px 30px rgba(24,93,47,.12)}
+.nav-icon,.nav-btn.active .nav-icon{color:#7de69b}.brand-mark{background:linear-gradient(145deg,#b6f7c3,#4ab66b 62%,#237240);box-shadow:0 0 30px rgba(92,220,126,.20)}
+.btn-primary{color:#05100a;background:linear-gradient(105deg,#78ee9a,#b1f3bd);box-shadow:0 9px 28px rgba(71,207,102,.16)}
+.btn-secondary{background:#0d2115;border-color:#2b5a38;color:#d8ebdc}.btn-secondary:hover{background:#12321d;border-color:#467d52}
+.panel,.feature-tile,.model-card,.overview-strip,.filter-bar,.output-panel,.studio-tabs,.quick-stats,.profile-visual,.dna-panel,.social-panel,.create-intro,.create-form{border-color:#21472e;background-color:rgba(10,27,16,.86);box-shadow:0 18px 55px rgba(0,0,0,.20)}
+.model-card:hover,.feature-tile:hover{border-color:#4b8d59;box-shadow:0 20px 60px rgba(23,92,43,.22);transform:translateY(-3px)}
+.model-tags span,.chip,.template-chip,.result-count{background:#10271a;border-color:#2c5c39;color:#aee7b9}.eyebrow,.hero-kicker,.small,.muted-count{color:#82d99a}
+.search-wrap{background:#091a0f;border-color:#244c31}.search-wrap input,.filter-bar select,input,select,textarea{background:#091a0f;border-color:#285437;color:#edf8ef}.search-wrap:focus-within,input:focus,select:focus,textarea:focus{border-color:#6acb82;box-shadow:0 0 0 3px rgba(86,203,113,.10);outline:none}
+.hero-accent{color:#86eba0}.dash-hero{border-color:#28563a;background:linear-gradient(120deg,#0a2112,#0d2918 54%,#102e1a);box-shadow:0 25px 80px rgba(17,82,39,.18)}
+.hero-gallery,.editorial-tile{border-color:#2c5d3a}.gallery-label{color:#b7eac0}.live-pulse,.secure-dot{background:#66e78c;box-shadow:0 0 0 4px rgba(102,231,140,.12)}
+.studio-tabs{background:#08170d}.mode-btn.active{background:#163b22;border-color:#4a8755;color:#dff9e4}.mode-btn:hover{background:#102d19}.generation-row{background:#0a1e11;border-color:#29583a}.output-head{border-bottom-color:#21472e}.output-body{background:#06110a}.output-empty{color:#91aa98}.output-error{background:#261313;border-color:#6a3434}.identity-warning{background:#112819;border-color:#2e5d3b;color:#a9d5b2}
+.profile-state,.identity-status{background:#10271a;border-color:#2c5d39}.dna-live{background:#0b2112;border-color:#2d5f3b}.social-state i{background:#74df8d}.disclosure{border-color:#21472e;background:#091a0f;color:#8fa993}
+@media(max-width:900px){.sidebar{display:none}.main{width:100%;padding:18px 16px 90px}.mobile-head{display:flex;align-items:center;gap:10px;margin-bottom:20px}.mobile-head b{font-size:12px;letter-spacing:.08em}.mobile-head b span{display:block;font-size:8px;color:#78917d;margin-top:3px}.mobile-menu{margin-left:auto;background:#0d2115;border:1px solid #2c5d39;color:#a9e8b5;border-radius:9px;padding:8px 10px}.dash-hero{grid-template-columns:1fr!important}.hero-gallery{min-height:300px}.model-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.studio-layout,.profile-layout,.create-layout{grid-template-columns:1fr!important}.studio-tabs{overflow-x:auto}.page-head{gap:12px}.page-head h1{font-size:28px}}
+@media(max-width:520px){.model-grid{grid-template-columns:1fr!important}.settings-grid,.dna-grid{grid-template-columns:1fr!important}.overview-strip{grid-template-columns:1fr 1fr}.overview-note{grid-column:1/-1}.page-head{display:block}.head-action{padding-top:14px}.btn-primary,.btn-secondary{padding:11px 13px}}
