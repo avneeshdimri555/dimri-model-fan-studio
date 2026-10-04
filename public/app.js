@@ -156,3 +156,130 @@ function updateDnaFromProfile(){if($("dnaGender"))updateDna()}
 function downloadAsset(){if(!currentAsset)return;const a=document.createElement("a");a.href=currentAsset.image;a.download="dimri-generated-image.png";a.click()}
 window.navigate=navigate;window.home=home;window.drawModels=drawModels;window.openModel=openModel;window.createModel=createModel;window.myModels=myModels;window.assets=assets;window.studio=studio;window.startWithSelected=startWithSelected;window.updateDna=updateDna;window.saveCurrentModel=saveCurrentModel;window.saveNewModel=saveNewModel;window.selectMode=selectMode;window.generate=generate;window.downloadAsset=downloadAsset;window.previewReference=previewReference;window.saveSocialProfile=saveSocialProfile;window.connectInstagram=connectInstagram;window.syncInstagram=syncInstagram;window.draftCommentReply=draftCommentReply;window.copyReplyDraft=copyReplyDraft;window.exportModelData=exportModelData;
 handleInstagramCallback();home();hydrateIdentityReferences().then(()=>{if(activeView==="market")home();else if(activeView==="profile"&&selected)modelProfile()});
+
+/* DIMRI MODEL STUDIO — AI photography prompt engine v1 */
+const DIMRI_PROMPT_TEMPLATES=(()=>{
+  const categories=[
+    ["Portrait","Close-up editorial portrait with natural skin texture, realistic eyes, subtle facial asymmetry, individual hair strands, authentic pores and refined professional lighting"],
+    ["Beauty","Premium beauty campaign close-up emphasizing realistic skin microtexture, natural lips, detailed eyelashes, believable catchlights and controlled studio light"],
+    ["Fashion","Luxury fashion editorial with sophisticated styling, realistic fabric texture, natural body proportions, confident pose and cinematic depth"],
+    ["Lifestyle","Candid lifestyle photograph with authentic posture, natural expression, environmental detail and believable ambient light"],
+    ["Street","Contemporary street-fashion photograph with spontaneous movement, realistic urban texture, natural shadows and documentary-inspired framing"],
+    ["Travel","Luxury travel lifestyle photograph in a believable destination with natural daylight, environmental storytelling and realistic skin and hair response"],
+    ["Fitness","Premium fitness lifestyle photograph showing natural anatomy, realistic muscle definition, authentic skin texture and controlled athletic lighting"],
+    ["Business","Professional executive portrait with realistic complexion, refined wardrobe, natural expression and polished commercial photography"],
+    ["Cinematic","Film-inspired cinematic portrait with atmospheric depth, motivated lighting, realistic skin response and subtle photographic grain"],
+    ["Macro","Extreme facial-detail photograph showing realistic iris structure, eyelashes, eyebrow strands, pores and fine skin texture without artificial smoothing"]
+  ];
+  const environments=["neutral studio","sunlit modern apartment","rainy city street at blue hour","luxury hotel lobby","coastal resort at golden hour","minimalist cafe","rooftop overlooking a modern skyline","quiet forest path after sunrise","high-end fashion showroom","dramatic night street"];
+  const out=[];
+  categories.forEach(function(cat){
+    environments.forEach(function(env){
+      out.push({
+        id:"TPL-"+String(out.length+1).padStart(3,"0"),
+        category:cat[0],
+        name:cat[0]+" — "+env,
+        prompt:cat[1]+". Place the selected fictional adult model in "+env+", preserving the saved Model DNA and recognizable facial identity while changing only scene, styling, pose and lighting. Use authentic photographic proportions, realistic hands, natural hair flyaways, subtle imperfections, physically plausible shadows, accurate color response, professional camera rendering and no plastic skin."
+      });
+    });
+  });
+  return out;
+})();
+function dimriIdentityPrompt(m){
+  if(!m)return "Original fictional adult AI model with natural anatomy and photorealistic photographic detail.";
+  return [
+    "Fictional adult AI model identity: "+m.name,
+    "Gender presentation: "+m.gender+", age "+m.age+" years",
+    "Face: "+m.face+" facial structure, "+(m.eyeShape||"natural")+" eyes, "+m.eyes+" irises, "+(m.brows||"natural")+" eyebrows, "+(m.nose||"natural")+" nose, "+(m.lips||"natural")+" lips, "+(m.jaw||"natural")+" jaw",
+    "Skin: "+m.skin+" tone, "+(m.undertone||"neutral")+" undertone, "+(m.skinDetails||"natural imperfections")+" with visible pores and fine texture",
+    "Hair: "+(m.hairColour||m.hair)+"; texture "+(m.hairTexture||"natural")+", realistic hairline and individual strands",
+    "Body: "+m.height+" cm, "+m.build+" build, natural proportions",
+    "Identity rule: preserve recognizable facial geometry, eye spacing, nose and lip proportions, jawline and distinctive features across generations; do not make the face look like a different person."
+  ].join(". ");
+}
+function dimriBuildPrompt(m,s){
+  s=s||{};
+  return [
+    dimriIdentityPrompt(m),
+    s.base||"Professional ultra-realistic editorial photography",
+    "Outfit: "+(s.outfit||"refined contemporary fashion"),
+    "Pose: "+(s.pose||"natural relaxed pose"),
+    "Expression: "+(s.expression||"calm confident"),
+    "Environment: "+(s.location||"neutral studio"),
+    "Lighting: "+(s.lighting||"soft cinematic key light with realistic fill and shadow falloff"),
+    "Camera: "+(s.camera||"full-frame professional camera, 85mm portrait lens"),
+    "Composition: "+(s.composition||"clean editorial framing with natural depth of field"),
+    "Realism: realistic pores, peach fuzz, fine lines, natural asymmetry, individual eyelashes, believable iris detail, realistic hair flyaways, natural hands and anatomy, physically plausible shadows and skin color",
+    "Negative: plastic skin, excessive smoothing, uncanny eyes, over-sharpening, distorted hands, extra fingers, malformed anatomy, waxy complexion, duplicate accessories, artificial facial symmetry",
+    "Format: "+(s.aspectRatio||"9:16")
+  ].join(". ");
+}
+function dimriCopyPrompt(value){
+  const textValue=String(value||"");
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(textValue).then(function(){alert("Prompt copied to clipboard.")}).catch(function(){dimriFallbackCopy(textValue)});
+  }else dimriFallbackCopy(textValue);
+}
+function dimriFallbackCopy(value){
+  const t=document.createElement("textarea");t.value=value;document.body.appendChild(t);t.select();document.execCommand("copy");t.remove();alert("Prompt copied to clipboard.");
+}
+function dimriPromptLibrary(){
+  activeView="prompts";
+  const grouped={};
+  DIMRI_PROMPT_TEMPLATES.forEach(function(t){if(!grouped[t.category])grouped[t.category]=[];grouped[t.category].push(t)});
+  let html=pageHead("PROMPT ENGINE","Prompt Library","100 reusable professional photography prompts built for consistent fictional adult AI models.",'<button class="btn-primary" onclick="navigate(\'studio\')">Open Studio →</button>');
+  html+='<div class="prompt-library-grid">';
+  Object.keys(grouped).forEach(function(cat){
+    html+='<section class="panel prompt-category"><div class="section-head"><div><h2>'+esc(cat)+'</h2><p>'+grouped[cat].length+' templates</p></div></div>';
+    grouped[cat].forEach(function(t){
+      html+='<article class="prompt-template"><div><span class="template-chip">'+esc(t.id)+'</span><b>'+esc(t.name)+'</b></div><p>'+esc(t.prompt)+'</p><button class="btn-secondary" onclick="dimriCopyPrompt('+JSON.stringify(t.prompt)+')">Copy prompt</button></article>';
+    });
+    html+='</section>';
+  });
+  html+='</div>';
+  shell("prompts",html);
+}
+function dimriEnhanceStudio(){
+  const tools=document.querySelector(".studio-content");
+  if(!tools||document.getElementById("dimriPromptTools"))return;
+  const bar=document.createElement("div");
+  bar.id="dimriPromptTools";
+  bar.className="generation-tools";
+  bar.innerHTML='<button class="btn-secondary" type="button" onclick="dimriUseRandomTemplate()">Use 100-template prompt</button><button class="btn-secondary" type="button" onclick="dimriBuildContextPrompt()">Build Model DNA prompt</button><button class="btn-secondary" type="button" onclick="dimriCopyPrompt(document.getElementById(\'prompt\')?.value||\'\')">Copy prompt</button>';
+  const target=tools.querySelector(".settings-grid");
+  if(target)tools.insertBefore(bar,target);
+}
+function dimriUseRandomTemplate(){
+  const t=DIMRI_PROMPT_TEMPLATES[Math.floor(Math.random()*DIMRI_PROMPT_TEMPLATES.length)];
+  const p=document.getElementById("prompt");
+  if(p)p.value=selected?dimriBuildPrompt(selected,{base:t.prompt,aspectRatio:document.getElementById("ratio")?.value||"9:16"}):t.prompt;
+  document.getElementById("jobStatus")&&(document.getElementById("jobStatus").textContent="Template "+t.id+" applied · "+t.category);
+}
+function dimriBuildContextPrompt(){
+  const p=document.getElementById("prompt");
+  if(!p)return;
+  p.value=dimriBuildPrompt(selected,{base:"Professional ultra-realistic editorial photograph of the selected model",outfit:document.getElementById("outfit")?.value,pose:document.getElementById("pose")?.value,location:document.getElementById("location")?.value,expression:document.getElementById("expression")?.value,camera:document.getElementById("camera")?.value,lighting:document.getElementById("lighting")?.value,aspectRatio:document.getElementById("ratio")?.value||"9:16"});
+  document.getElementById("jobStatus")&&(document.getElementById("jobStatus").textContent="Model DNA prompt generated.");
+}
+const DIMRI_ORIGINAL_STUDIO=studio;
+studio=function(){DIMRI_ORIGINAL_STUDIO();dimriEnhanceStudio()};
+const DIMRI_ORIGINAL_GENERATE=generate;
+generate=async function(){
+  const p=document.getElementById("prompt");
+  if(p&&selected)p.value=dimriBuildPrompt(selected,{base:p.value,outfit:document.getElementById("outfit")?.value,pose:document.getElementById("pose")?.value,location:document.getElementById("location")?.value,expression:document.getElementById("expression")?.value,camera:document.getElementById("camera")?.value,lighting:document.getElementById("lighting")?.value,aspectRatio:document.getElementById("ratio")?.value||"9:16"});
+  return DIMRI_ORIGINAL_GENERATE();
+};
+const DIMRI_ORIGINAL_NAV=navigate;
+navigate=function(view){
+  if(view==="prompts")return dimriPromptLibrary();
+  return DIMRI_ORIGINAL_NAV(view);
+};
+const DIMRI_ORIGINAL_NAV_HTML=nav;
+nav=function(view){
+  const html=DIMRI_ORIGINAL_NAV_HTML(view);
+  return html.replace('<button class="nav-btn '+(view==="studio"?"active":"")+'"','<button class="nav-btn"');
+};
+window.dimriPromptLibrary=dimriPromptLibrary;
+window.dimriCopyPrompt=dimriCopyPrompt;
+window.dimriUseRandomTemplate=dimriUseRandomTemplate;
+window.dimriBuildContextPrompt=dimriBuildContextPrompt;
