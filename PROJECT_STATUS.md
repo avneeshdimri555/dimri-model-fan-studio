@@ -94,3 +94,11 @@ The redesigned frontend, consent-gated reference conditioning, per-model social/
 6. Connect and test video, image-to-video, edit, upscale, trend/motion and frame-to-frame providers.
 7. Add authentication, billing and social publishing.
 8. Run end-to-end regression tests, including real Gemini generation and Meta test-account publishing/comment flows, and update this file with verified results.
+
+## Forest-green dashboard redesign — 2026-10-04
+- Replaced the initial Discover-first landing layout with a dashboard-style landing page based on the user's approved green reference: prominent hero area, quick stats, creator-workflow feature tiles, model gallery and search/filter controls.
+- Updated the shared UI theme from blue/cyan to forest green, emerald and warm neutral accents, including cards, navigation, inputs, panels and responsive mobile layouts.
+- Dashboard metrics intentionally show only grounded template counts and neutral/empty values; live reach and earnings are not fabricated.
+- The hero portrait is a CSS illustration, not a generated photorealistic model asset. Template cards remain neutral until actual portraits are generated.
+- Dashboard changes were committed to GitHub on main; Render auto-deploy is expected from the latest commit. Deployment and public browser rendering must be verified before marking the redesign live.
+- The dashboard does not make pending provider integrations, persistent storage, billing, or video modes complete.
