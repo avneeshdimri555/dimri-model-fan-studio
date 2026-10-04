@@ -109,3 +109,10 @@ The redesigned frontend, consent-gated reference conditioning, per-model social/
 - Model cards now clearly distinguish generated portraits from portrait-ready identity templates without pretending a portrait exists.
 - Create Model and dashboard visuals are now aligned to the Forest Green editorial direction.
 - Real photorealistic portrait assets are still not fabricated; they require actual image-generation execution/storage.
+
+## Final portrait/UI pass — 2026-10-04
+- Removed the CSS cartoon-style hero treatment from the current dashboard implementation.
+- Added fictional AI portrait previews to the dashboard editorial gallery and all 50 model cards using an external AI-face preview source; these are previews, not portraits generated/stored by DIMRI.
+- Unified model cards and dashboard visuals under the forest-green visual system.
+- The actual Gemini-generated portrait remains the authoritative asset after a successful Create Image request; preview faces are replaced in-session when generation succeeds.
+- Latest source commits: `a6177105e68e9e96a28cebc7d9ebdd693e31e54d` (portrait preview logic) and `77c4573dc707249371c893ca79f6cc22c9d942b2` (portrait gallery styling).
