@@ -100,12 +100,12 @@ app.post("/api/generate",async(req,res)=>{
       const interaction=await ai.interactions.create({
         model:"gemini-3.1-flash-image",
         input:referencePart?[referencePart,{type:"text",text:fullPrompt}]:fullPrompt,
-        response_format:{type:"image",mime_type:"image/png",aspect_ratio:imageFormat(settings.aspectRatio),image_size:"1K"}
+        response_format:{type:"image",mime_type:"image/jpeg",aspect_ratio:imageFormat(settings.aspectRatio),image_size:"1K"}
       });
       let image=null;
       for(const step of interaction?.steps||[]){for(const block of step?.content||[]){if(block?.type==="image"&&block?.data){image=block.data;break}}if(image)break}
       if(!image&&interaction?.output_image?.data)image=interaction.output_image.data;
-      if(image)return res.json({ok:true,status:"completed",provider:"gemini",mode,modelId,imageDataUrl:"data:image/png;base64,"+image});
+      if(image)return res.json({ok:true,status:"completed",provider:"gemini",mode,modelId,imageDataUrl:"data:image/jpeg;base64,"+image});
       errors.push("Gemini returned no image");
     }catch(error){
       const message=error?.message||"Gemini image generation failed.";
