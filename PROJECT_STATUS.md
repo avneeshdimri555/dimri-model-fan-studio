@@ -122,3 +122,10 @@ The redesigned frontend, consent-gated reference conditioning, per-model social/
 - Model reference images can now persist in browser storage per model and are reused on later generation requests in the same browser.
 - Create Image sends the selected reference image to Gemini when consent is confirmed; the prompt explicitly requests consistent recognizable adult identity while changing scene/outfit/pose/lighting.
 - This is a session/browser-level Live Face Clone workflow, not a server-side permanent identity model. Durable cloud identity storage still requires project-specific persistent storage.
+
+## Image visibility and viewport fix — 2026-10-04
+- Root cause in source: model cards rendered initials/placeholders rather than image elements, and dashboard hero used a third-party dynamic image endpoint that was failing in the user's screenshot.
+- Added fixed Unsplash CDN portrait preview URLs for the seeded feminine/masculine model templates and replaced the dynamic hero image endpoint. These are stock-photo visual previews, not DIMRI-generated fictional identities; replace with generated assets when available.
+- Increased model card portrait area, expanded the main canvas to use available desktop width, and updated responsive grid sizing.
+- Added cache-busting query versions to app.js and styles.css references in index.html so browsers request the updated frontend.
+- No public-browser screenshot/E2E test is available in this execution. Render deployment status must be checked before calling these changes live; external image CDN availability still depends on the visitor's network.
