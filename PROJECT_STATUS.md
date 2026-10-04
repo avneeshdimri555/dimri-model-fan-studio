@@ -116,3 +116,9 @@ The redesigned frontend, consent-gated reference conditioning, per-model social/
 - Unified model cards and dashboard visuals under the forest-green visual system.
 - The actual Gemini-generated portrait remains the authoritative asset after a successful Create Image request; preview faces are replaced in-session when generation succeeds.
 - Latest source commits: `a6177105e68e9e96a28cebc7d9ebdd693e31e54d` (portrait preview logic) and `77c4573dc707249371c893ca79f6cc22c9d942b2` (portrait gallery styling).
+
+## Visible models + Live Face Clone pass — 2026-10-04
+- Seeded 50 model cards now use visible portrait previews instead of blank/cartoon placeholders.
+- Model reference images can now persist in browser storage per model and are reused on later generation requests in the same browser.
+- Create Image sends the selected reference image to Gemini when consent is confirmed; the prompt explicitly requests consistent recognizable adult identity while changing scene/outfit/pose/lighting.
+- This is a session/browser-level Live Face Clone workflow, not a server-side permanent identity model. Durable cloud identity storage still requires project-specific persistent storage.
