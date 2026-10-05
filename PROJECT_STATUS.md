@@ -300,3 +300,12 @@ The redesigned frontend, consent-gated reference conditioning, per-model social/
 - Current social backend has Instagram Business Login scaffolding, connection/status/insights/media/comments/publish endpoints, but connection state is in-memory and requires Meta app configuration. YouTube and Facebook publishing are not implemented/verified in this repository yet. Do not label them live.
 - Current frontend has Model DNA, browser-local identity/reference persistence, prompt library, image studio, model library and Instagram connection UI. It does not yet have a verified cloud database or a fully implemented multi-platform social publishing pipeline.
 - QA rule for launch: never present stock or placeholder images as generated AI models; never mark provider, face consistency, or social publishing active without an actual verified result. Subscription/billing remains deferred.
+
+
+## Launch verification checkpoint — 2026-10-05 10:56 IST
+- Render deployment `dep-db1ir9v9nhgc739fhaug` for commit `148d153f861cc2edffa20535c9e7875379fd44f2` is **LIVE**. This is the current main deployment.
+- The Gemini Interactions API migration is included in the live lineage. The earlier migration deployment `dep-db1iqugjo6nc73akovjg` was live before the frontend build and is now deactivated by the newer deployment.
+- Frontend JavaScript source parse passed after adding Campaign Builder and AI Team navigation/workflows. These workflows use browser-local campaign persistence; they are not cloud-backed.
+- Campaign Builder now creates model-specific prompt packs using the selected Model DNA and can load individual prompts into Photography Studio. AI Team page exposes the defined software roles and clearly distinguishes unverified integrations.
+- **Not launch-complete yet:** no authenticated end-to-end Gemini generation result has been verified from the live public deployment; no reference-face consistency comparison has been verified; YouTube/Facebook publishing is not implemented/verified; Instagram requires Meta app credentials and account permissions and its connection state is currently in-memory; no cloud database/image storage; video generation is not connected.
+- Do not report “all functions active/live” until these blockers are actually tested or explicitly accepted as deferred. Subscription/billing/voice remain deferred by user scope.
