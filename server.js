@@ -153,34 +153,36 @@ app.post("/api/generate",async(req,res)=>{
   if(process.env.GEMINI_API_KEY){
     try{
       const ai=new GoogleGenAI({apiKey:process.env.GEMINI_API_KEY});
-      const parts=[];
-      if(referencePart)parts.push({inlineData:{mimeType:referencePart.mime_type,data:referencePart.data}});
-      parts.push({text:fullPrompt});
-      const response=await ai.models.generateContent({
+      const input=[];
+      if(referencePart) input.push({type:"image",mime_type:referencePart.mime_type,data:referencePart.data});
+      input.push({type:"text",text:fullPrompt});
+      const interaction=await ai.interactions.create({
         model:process.env.GEMINI_IMAGE_MODEL||"gemini-3.1-flash-image",
-        contents:[{role:"user",parts}],
-        config:{
-          responseModalities:["IMAGE","TEXT"],
-          imageConfig:{aspectRatio:imageFormat(settings.aspectRatio),imageSize:"1K"}
-        }
+        input
       });
       let image=null,outputMime="image/png";
-      for(const candidate of response?.candidates||[]){
-        for(const part of candidate?.content?.parts||[]){
-          const inline=part?.inlineData||part?.inline_data;
-          if(inline?.data){image=inline.data;outputMime=inline.mimeType||inline.mime_type||"image/png";break}
+      if(interaction?.output_image?.data){
+        image=interaction.output_image.data;
+        outputMime=interaction.output_image.mime_type||interaction.output_image.mimeType||"image/png";
+      }
+      if(!image){
+        for(const step of interaction?.steps||[]){
+          for(const block of step?.content||[]){
+            const candidate=block?.output_image||block?.image||block?.inline_data||block?.inlineData;
+            if(candidate?.data){image=candidate.data;outputMime=candidate.mime_type||candidate.mimeType||"image/png";break}
+          }
+          if(image)break;
         }
-        if(image)break;
       }
       if(image)return res.json({ok:true,status:"completed",provider:"gemini",mode,modelId,imageDataUrl:"data:"+outputMime+";base64,"+image});
-      const providerText=(response?.candidates||[]).flatMap(c=>c?.content?.parts||[]).map(p=>p?.text).filter(Boolean).join(" ").slice(0,500);
-      errors.push("Gemini returned no image"+(providerText?": "+providerText:""));
+      const textOutput=(interaction?.steps||[]).flatMap(s=>s?.content||[]).map(x=>x?.text).filter(Boolean).join(" ").slice(0,500);
+      errors.push("Gemini returned no image"+(textOutput?": "+textOutput:""));
     }catch(error){
       const message=error?.message||"Gemini image generation failed.";
       console.error("Gemini generation error:",message);
       errors.push("Gemini: "+message);
     }
-  }else errors.push("Gemini key not configured");
+  }
 
   // Reference-conditioned requests stay on Gemini: generic fallback providers are text-to-image and cannot promise identity consistency.
   if(!referencePart){
