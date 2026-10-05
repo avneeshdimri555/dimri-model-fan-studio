@@ -34,7 +34,7 @@ app.post("/webhooks/instagram",(req,res)=>{console.log("Instagram webhook event 
 app.get("/api/health",(req,res)=>res.json({
   ok:true,
   service:"DIMRI Model & Fan Studio",
-  version:"0.3.1",
+  version:"0.3.2",
   imageProvider:process.env.GEMINI_API_KEY?"gemini_configured":"not_configured",
   imageFallbacks:{openai:Boolean(process.env.OPENAI_API_KEY),fal:Boolean(process.env.FAL_KEY),replicate:Boolean(process.env.REPLICATE_API_TOKEN),pollinations:Boolean(process.env.POLLINATIONS_API_KEY)},
   voiceProvider:process.env.ELEVENLABS_API_KEY?"elevenlabs_configured":"not_configured",
@@ -153,29 +153,27 @@ app.post("/api/generate",async(req,res)=>{
   if(process.env.GEMINI_API_KEY){
     try{
       const ai=new GoogleGenAI({apiKey:process.env.GEMINI_API_KEY});
-      const input=[];
-      if(referencePart) input.push({type:"image",mime_type:referencePart.mime_type,data:referencePart.data});
-      input.push({type:"text",text:fullPrompt});
-      const interaction=await ai.interactions.create({
+      const contents=[];
+      if(referencePart) contents.push({inlineData:{mimeType:referencePart.mime_type,data:referencePart.data}});
+      contents.push({text:fullPrompt});
+      const response=await ai.models.generateContent({
         model:process.env.GEMINI_IMAGE_MODEL||"gemini-3.1-flash-image",
-        input
+        contents,
+        config:{
+          responseModalities:["IMAGE"],
+          responseFormat:{image:{aspectRatio:imageFormat(settings.aspectRatio),imageSize:process.env.GEMINI_IMAGE_SIZE||"1K"}}
+        }
       });
       let image=null,outputMime="image/png";
-      if(interaction?.output_image?.data){
-        image=interaction.output_image.data;
-        outputMime=interaction.output_image.mime_type||interaction.output_image.mimeType||"image/png";
-      }
-      if(!image){
-        for(const step of interaction?.steps||[]){
-          for(const block of step?.content||[]){
-            const candidate=block?.output_image||block?.image||block?.inline_data||block?.inlineData;
-            if(candidate?.data){image=candidate.data;outputMime=candidate.mime_type||candidate.mimeType||"image/png";break}
-          }
-          if(image)break;
+      for(const part of response?.candidates?.[0]?.content?.parts||[]){
+        if(part?.inlineData?.data){
+          image=part.inlineData.data;
+          outputMime=part.inlineData.mimeType||part.inlineData.mime_type||"image/png";
+          break;
         }
       }
       if(image)return res.json({ok:true,status:"completed",provider:"gemini",mode,modelId,imageDataUrl:"data:"+outputMime+";base64,"+image});
-      const textOutput=(interaction?.steps||[]).flatMap(s=>s?.content||[]).map(x=>x?.text).filter(Boolean).join(" ").slice(0,500);
+      const textOutput=(response?.candidates?.[0]?.content?.parts||[]).map(x=>x?.text).filter(Boolean).join(" ").slice(0,500);
       errors.push("Gemini returned no image"+(textOutput?": "+textOutput:""));
     }catch(error){
       const message=error?.message||"Gemini image generation failed.";
