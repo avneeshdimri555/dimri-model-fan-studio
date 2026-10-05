@@ -67,7 +67,7 @@ async function bufferToDataUrl(response){
   if(!buffer.length)throw new Error("Provider returned an empty image.");
   return "data:"+mime.split(";")[0]+";base64,"+buffer.toString("base64");
 }
-async function generateWithOpenAI(fullPrompt,settings){
+async async function generateWithOpenAI(fullPrompt,settings){
   if(!process.env.OPENAI_API_KEY)throw new Error("OpenAI key not configured.");
   const model=process.env.OPENAI_IMAGE_MODEL||"gpt-image-1";
   const size=settings.aspectRatio==="9:16"?"1024x1536":settings.aspectRatio==="16:9"?"1536x1024":"1024x1024";
