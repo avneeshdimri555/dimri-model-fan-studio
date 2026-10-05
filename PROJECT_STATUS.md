@@ -290,3 +290,13 @@ The redesigned frontend, consent-gated reference conditioning, per-model social/
 - Cache-busting updated to `20261005a` so the deployed browser receives the latest frontend.
 - Remaining core blockers to call the product fully live: authenticated provider generation E2E, reference-image identity consistency E2E, durable cloud model/image persistence, and verified YouTube/Facebook publishing. Instagram backend is present but credentials/account permissions and a real publish test are not verified.
 - No subscription/billing work was added; it remains deferred.
+
+
+## Current launch build — 2026-10-05 10:22 IST
+- Launch work resumed on explicit user instruction. Core launch scope excludes subscriptions/billing and excludes voice; focus is model creation, Model DNA, reference-conditioned photography, prompt studio, custom images, campaign workflow, model library, AI team visibility, and social publishing/connectors.
+- Critical provider fix committed: Gemini 3.1 Flash Image is now called through the current `@google/genai` Interactions API (`ai.interactions.create`) instead of the legacy `models.generateContent` path that matched the user's live 400 error. Commit: `761b0b28c969602a4cbf2e4adebefc83e925b79e`.
+- Render deployment for that commit is currently in progress; do not claim it live until Render reports `live`.
+- Official Google documentation confirms `gemini-3.1-flash-image` image generation is supported through the Interactions API and that JavaScript uses `ai.interactions.create`; reference-image input can be supplied as an image block plus text. This supports the implementation direction.
+- Current social backend has Instagram Business Login scaffolding, connection/status/insights/media/comments/publish endpoints, but connection state is in-memory and requires Meta app configuration. YouTube and Facebook publishing are not implemented/verified in this repository yet. Do not label them live.
+- Current frontend has Model DNA, browser-local identity/reference persistence, prompt library, image studio, model library and Instagram connection UI. It does not yet have a verified cloud database or a fully implemented multi-platform social publishing pipeline.
+- QA rule for launch: never present stock or placeholder images as generated AI models; never mark provider, face consistency, or social publishing active without an actual verified result. Subscription/billing remains deferred.
