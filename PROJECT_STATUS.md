@@ -279,3 +279,14 @@ The redesigned frontend, consent-gated reference conditioning, per-model social/
 - Current verified limits remain: no confirmed cloud database/persistent multi-device model storage; Meta login is scaffolding/in-memory; YouTube/Facebook OAuth publishing is not confirmed; Gemini generation remains blocked/unverified by legacy Interactions API compatibility and provider account/credit/access issues. No live identity consistency E2E test yet.
 - Next implementation priority: (1) repair and E2E-test one image provider path without incurring unapproved charges; (2) reliable model creation + Model DNA + same-browser persistence and reference-conditioned generation; (3) Photography/Prompt/Campaign flows; (4) visible agent/task workspace; (5) secure social OAuth and approval/scheduling/publishing; (6) analytics and QA. Subscription/billing is deferred.
 - This is a requirements/status update only; it does not itself implement or verify these modules or social posting.
+
+
+## 2026-10-05 execution pass — core generation fixes
+- Audited current main branch before changes.
+- Found two real JavaScript/backend blockers that could prevent generation from running: `generate()` contained an async function with an invalid syntax state in the frontend, and `generateWithOpenAI()` used `await` without being declared async in the backend. Fixed both.
+- Re-checked `public/app.js` with JavaScript parser via `new Function(...)`: **PASS** after the fixes.
+- Current frontend Generate flow sends Model DNA + scene settings + authorized reference image to `POST /api/generate`. Reference requests intentionally do not fall back to generic text-to-image providers because that cannot guarantee identity preservation.
+- Backend currently supports actual provider calls for Gemini, OpenAI Images, fal.ai, Replicate and Pollinations, but provider/account availability remains an external dependency. Environment-variable presence is not treated as successful provider verification.
+- Cache-busting updated to `20261005a` so the deployed browser receives the latest frontend.
+- Remaining core blockers to call the product fully live: authenticated provider generation E2E, reference-image identity consistency E2E, durable cloud model/image persistence, and verified YouTube/Facebook publishing. Instagram backend is present but credentials/account permissions and a real publish test are not verified.
+- No subscription/billing work was added; it remains deferred.
